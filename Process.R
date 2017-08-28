@@ -50,10 +50,10 @@ for (line in lines){
     }
     
     #get the rest of the data
-    else {
+    else if (grepl('Exotics: Quinella' , x , ignore.case = TRUE )) {
       # working with Exotics: Quinella , (1-4): 12.80 Perfecta , (1-4): 42.00 Trifecta , (1-4-5): 111.60 Superfecta , (1-4-5-3): 103.50
 
-      if (grepl('Exotics: Quinella' , x , ignore.case = TRUE )) {
+      
         Quinella <- c(Quinella, trimws(substr(x, 27,33)))
         Perfecta <- c(Perfecta, trimws(substr(x, 55,61)))
         #logic to make work for T & S
@@ -87,7 +87,7 @@ for (line in lines){
       }
       
       #ignoring the middle line like Lashmet Kennel, Bd, F, 11/28/15, Barcelona Boss - Lk's Cherokee
-      else if (grepl('-' , x , ignore.case = TRUE ) && !grepl('/`' , x , ignore.case = TRUE )) {
+      else if (grepl('-' , x , ignore.case = TRUE ) | grepl('/' , x , ignore.case = TRUE )) {
           
       }
       else {
@@ -99,21 +99,26 @@ for (line in lines){
         Name <- c(Name, nameCol)
         StartingPosition <- c(StartingPosition, secondSplit[4])
         revSecondSplit <- rev(secondSplit)
-
+        
         #loop to get the Finish Position	Time	Final Odds
+        # 10 because i have reverse the line and i am extracting from the other side
+        # so by 10 i am expecting all 3 of them like 2    2    1  .5  31.45 2.30 Bmpd, 1st To Task
         for (i in 1 : 10) {
-          if (!grepl("^[A-Za-z,&1st]+$", revSecondSplit[i], perl = T)) {
+          # this cheks where each element of revSecondSplit contains any character or & or , 
+          # if yes it will return true and hence !(negate) is returing false
+          #2    1  .5  31.45 2.30 Bmpd, Kept To TasK  ==> these are 10 elemnts of revSecondSplit 
+          if (!grepl("^[A-Za-z,&1st\r]+$", revSecondSplit[i], perl = T)) {
             fo <- revSecondSplit[i]
             rt <- revSecondSplit[i+1]
             fp <- revSecondSplit [i+3]
             break
           }
-          FinishingPosition <- c(FinishingPosition, fp)
-          Time <- c(Time, rt)
-          FinalOdds <- c(FinalOdds, fo)
         }
+        FinishingPosition <- c(FinishingPosition, fp)
+        Time <- c(Time, rt)
+        FinalOdds <- c(FinalOdds, fo)
       }
     }
   }
-}
+
 
