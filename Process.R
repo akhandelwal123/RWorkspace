@@ -63,39 +63,56 @@ for (line in lines){
         S <- unlist(gregexpr(pattern ='Superfecta', x))
         T <- unlist(gregexpr(pattern ='Trifecta', x))
         
-        posS <- min(which(myValuesPos > S  ))
-        posT <- min(which(myValuesPos > T  ))
-       
-        Trifecta <- c(Trifecta, trimws(substr(x, myValuesPos[posT]+1,myValuesPos[posT]+6)))
-        Superfecta <- c(Superfecta, trimws(substr(x, myValuesPos[posS]+1,myValuesPos[posS]+6)))
+        if (S != -1) {
+          posS <- min(which(myValuesPos > S  ))
+          Superfecta <- c(Superfecta, trimws(substr(x, myValuesPos[posS]+1,myValuesPos[posS]+7)))
+        }
+        if (T != -1) {
+          posT <- min(which(myValuesPos > T  ))
+          Trifecta <- c(Trifecta, trimws(substr(x, myValuesPos[posT]+1,myValuesPos[posT]+7)))
+        }
       }
-      #ignoring the middle line like Lashmet Kennel, Bd, F, 11/28/15, Barcelona Boss - Lk's Cherokee
-      else if (grepl(',' , x , ignore.case = TRUE )) {
+      # for next line superfecta/Trifecta
+      else if (grepl('fecta' , x , ignore.case = TRUE )) {
+        myValuesPosition <- unlist(gregexpr(pattern =':', x))
+        S <- unlist(gregexpr(pattern ='Superfecta', x))
+        T <- unlist(gregexpr(pattern ='Trifecta', x))
         
+        if (S != -1) {
+          Superfecta <- c(Superfecta, trimws(substr(x, myValuesPosition[1]+1,myValuesPosition[1]+7)))
+        }
+        if (T != -1) {
+          Trifecta <- c(Trifecta, trimws(substr(x, myValuesPosition[1]+1,myValuesPosition[1]+7)))
+        }
       }
-      # else {
-      #   firstSplit <- strsplit(x[[1]], " ")[[1]]
-      #   secondSplit <- strsplit(firstSplit, " ")
-      #   secondSplit[lapply(secondSplit,length)>0] 
-      #   secondSplit <- Filter(length, secondSplit)
-      #   nameCol <- paste(secondSplit[1],secondSplit[2])
-      #   Name <- c(Name, nameCol)
-      #   StartingPosition <- c(StartingPosition, secondSplit[4])
-      #   revSecondSplit <- rev(secondSplit)
-      #   
-      #   #loop to get the Finish Position	Time	Final Odds
-      #   for (i in 1 : 10) {
-      #     if (!grepl("^[A-Za-z,&1st]+$", revSecondSplit[i], perl = T)) {
-      #       fo <- revSecondSplit[i]
-      #       rt <- revSecondSplit[i+1]
-      #       fp <- revSecondSplit [i+3]
-      #       break
-      #     }
-      #     FinishingPosition <- c(FinishingPosition, fp)
-      #     Time <- c(Time, rt)
-      #     FinalOdds <- c(FinalOdds, fo)
-      #   }
-      # }  
+      
+      #ignoring the middle line like Lashmet Kennel, Bd, F, 11/28/15, Barcelona Boss - Lk's Cherokee
+      else if (grepl('-' , x , ignore.case = TRUE ) && !grepl('/`' , x , ignore.case = TRUE )) {
+          
+      }
+      else {
+        firstSplit <- strsplit(x[[1]], " ")[[1]]
+        secondSplit <- strsplit(firstSplit, " ")
+        secondSplit[lapply(secondSplit,length)>0]
+        secondSplit <- Filter(length, secondSplit)
+        nameCol <- paste(secondSplit[1],secondSplit[2])
+        Name <- c(Name, nameCol)
+        StartingPosition <- c(StartingPosition, secondSplit[4])
+        revSecondSplit <- rev(secondSplit)
+
+        #loop to get the Finish Position	Time	Final Odds
+        for (i in 1 : 10) {
+          if (!grepl("^[A-Za-z,&1st]+$", revSecondSplit[i], perl = T)) {
+            fo <- revSecondSplit[i]
+            rt <- revSecondSplit[i+1]
+            fp <- revSecondSplit [i+3]
+            break
+          }
+          FinishingPosition <- c(FinishingPosition, fp)
+          Time <- c(Time, rt)
+          FinalOdds <- c(FinalOdds, fo)
+        }
+      }
     }
   }
 }
