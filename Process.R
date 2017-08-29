@@ -1,12 +1,23 @@
 library(pdftools)
 file <- pdf_text('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
+info <- pdf_info('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
+pages <- xxx$pages
 #file <- pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Fri-Twi-8-18-charts.pdf')
-#typeof(file)
-pdfTextFile <- strsplit(file[[1]], "\n")[[1]]
-lines <- strsplit(pdfTextFile, "\n")
-limit <- max(nchar(lines))
 racevector <- distancevector <- gradevector <- Name <- StartingPosition <- FinishingPosition <- Time <- FinalOdds <- Win <- 
   Place <- Show <- Quinella <- Perfecta <- Trifecta <- Superfecta <- c()
+
+
+for (k in 1:pages) {
+pdfTextFile <- strsplit(file[[k]], "\n")[[1]]
+lines <- strsplit(pdfTextFile, "\n")
+
+if (max(nchar(lines)) > 130) {
+  limit <- max(nchar(lines))
+}
+else if (!exists("limit")){
+  limit <- max(nchar(lines))*2
+}
+
 
 #Track
 Track <- trimws(lines[1])
@@ -33,7 +44,7 @@ for (line in lines){
     if (grepl('Distance' , x , ignore.case = TRUE )) 
     {
       RaceNumber <- trimws(substr(x,1,4))
-      Grade <- trimws(substr(x,11,13))
+      Grade <- trimws(substr(x,12,13))
       Distance <- trimws(substr(x,24,27))
       racevector <- c(racevector, RaceNumber)
       distancevector <- c(distancevector, Distance)
@@ -141,7 +152,9 @@ for (line in lines){
 ###############################################################################
 
 
-#Get the remaing part of the pdf
+#Get the remaing part of the pdf if only it exists
+if (max(nchar(lines) < 130)) { 
+
 for (line in lines){
   if (!is.null(line) && !nchar(trimws(line)) == 0 ){
     x <- substr(line , limit/2+2 , limit)
@@ -250,4 +263,8 @@ for (line in lines){
       }
     }
   }
+}
+  
+}
+
 }
