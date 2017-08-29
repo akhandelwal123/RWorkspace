@@ -25,7 +25,7 @@ for (i in 1:2) {
 
 #for everything else
 for (line in lines){
-  if (!is.null(line)){
+  if (!is.null(line) && !nchar(trimws(line)) == 0 ){
     x <- substr(line , 1 , limit/2)
     #get the RN , Grade , Distance elements 
     if (grepl('Distance' , x , ignore.case = TRUE )) 
@@ -103,7 +103,8 @@ for (line in lines){
         #loop to get the Finish Position	Time	Final Odds
         # 10 because i have reverse the line and i am extracting from the other side
         # so by 10 i am expecting all 3 of them like 2    2    1  .5  31.45 2.30 Bmpd, 1st To Task
-        for (i in 1 : 10) {
+        if (!grepl("." , revSecondSplit[1] , fixed = TRUE )) {
+         for (i in 1 : 10) {
           # this cheks where each element of revSecondSplit contains any character or & or , 
           # if yes it will return true and hence !(negate) is returing false
           #2    1  .5  31.45 2.30 Bmpd, Kept To TasK  ==> these are 10 elemnts of revSecondSplit 
@@ -113,10 +114,12 @@ for (line in lines){
             fp <- revSecondSplit [i+3]
             break
           }
+         }
+          print('hello')
+          FinishingPosition <- c(FinishingPosition, fp)
+          Time <- c(Time, rt)
+          FinalOdds <- c(FinalOdds, fo)
         }
-        FinishingPosition <- c(FinishingPosition, fp)
-        Time <- c(Time, rt)
-        FinalOdds <- c(FinalOdds, fo)
       }
     }
   }
