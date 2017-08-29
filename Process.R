@@ -14,6 +14,7 @@ racevector <-
   Place <-
   Show <- Quinella <- Perfecta <- Trifecta <- Superfecta <- c()
 
+track =TRUE
 
 for (k in 1:pages) {
   pdfTextFile <- strsplit(file[[k]], "\n")[[1]]
@@ -28,7 +29,12 @@ for (k in 1:pages) {
   
   
   #Track
-  Track <- trimws(lines[1])
+  if (track) {
+   tracktail <- substr(trimws(lines[1]) , unlist(gregexpr(pattern = ' ', trimws(lines[1])))[1]+1,unlist(gregexpr(pattern = ' ', trimws(lines[1])))[1]+1)
+   trackhead <- substr(trimws(lines[1]),1,1)
+   Track <- paste(trackhead,tracktail, sep = '') 
+   track = !track
+  }
   
   #loop for the dates
   for (i in 1:2) {
@@ -36,10 +42,10 @@ for (k in 1:pages) {
       breakPoints <- unlist(gregexpr(pattern = ',', lines[i]))
       
       if (length(breakPoints) > 1) {
-        myDate <- trimws(substr(lines[i], breakPoints[1] + 1, breakPoints[2]))
+        RaceDate <- trimws(substr(lines[i], breakPoints[1] + 1, breakPoints[2]))
       }
       else {
-        myDate <- trimws(substr(lines[i], breakPoints[1] + 1, nchar(lines[i])))
+        RaceDate <- trimws(substr(lines[i], breakPoints[1] + 1, nchar(lines[i])))
       }
     }
   }
@@ -129,8 +135,10 @@ for (k in 1:pages) {
         secondSplit <- strsplit(firstSplit, " ")
         secondSplit[lapply(secondSplit, length) > 0]
         secondSplit <- Filter(length, secondSplit)
-        nameCol <- paste(secondSplit[1], secondSplit[2])
-        Name <- c(Name, nameCol)
+        if (!(grepl('NULL' ,secondSplit[1]) | grepl("\\d", secondSplit[1]))) {
+          nameCol <- paste(secondSplit[1], secondSplit[2])
+          Name <- c(Name, nameCol)
+        }
         for(l in 4:6) {
           if (nchar(secondSplit[l]) == 1){
           StartingPosition <- c(StartingPosition, secondSplit[l])
@@ -270,8 +278,11 @@ for (k in 1:pages) {
           secondSplit <- strsplit(firstSplit, " ")
           secondSplit[lapply(secondSplit, length) > 0]
           secondSplit <- Filter(length, secondSplit)
-          nameCol <- paste(secondSplit[1], secondSplit[2])
-          Name <- c(Name, nameCol)
+          if (!(grepl('NULL' ,secondSplit[1]) | grepl("\\d", secondSplit[1]))) {
+            nameCol <- paste(secondSplit[1], secondSplit[2])
+            Name <- c(Name, nameCol)
+          }
+          
           for(l in 4:6) {
             if (nchar(secondSplit[l]) == 1){
               StartingPosition <- c(StartingPosition, secondSplit[l])
@@ -324,3 +335,14 @@ for (k in 1:pages) {
   }
   
 }
+
+
+
+###########################################Filtering out the remaining items
+Name <- Name[-c(1, length(Name))]
+FinalOdds <- FinalOdds[-1]
+FinishingPosition <- FinishingPosition[-1]
+
+
+############################################Creating Data Frame
+#exportDataToExcel <- data.frame(Name,)
