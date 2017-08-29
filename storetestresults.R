@@ -1,3 +1,21 @@
+# 5.
+# racemap <- new.env(hash=T, parent=emptyenv())
+# assign('Evening', 'Eve', racemap)
+# assign('Twilight', 'Twi', racemap)
+# assign('Afternoon', 'Aft', racemap)
+# assign('Monday', 'Mon', racemap)
+# assign('Tuesday', 'Tue', racemap)
+# assign('Wednesday', 'Wed', racemap)
+# assign('Thursday', 'Thur', racemap)
+# assign('Friday', 'Fri', racemap)
+# assign('Saturday', 'Sat', racemap)
+# assign('Sunday', 'Sun', racemap)
+# assign('Evening', 'Eve', racemap)
+# for (v in ls(racemap)) {
+#   print(v)
+#   print(racemap[[v]])
+# }
+
 
 #4. 
 # x <- "Lk's Marcella    67.5 1 1 2    2    1  .5  31.45 2.30 Bmpd, 1st To Task "

@@ -3,8 +3,24 @@ file <-
   pdf_text('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
 info <-
   pdf_info('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
-pages <- xxx$pages
+pages <- info$pages
 #file <- pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Fri-Twi-8-18-charts.pdf')
+
+#RaceMaps
+racemap <- new.env(hash=T, parent=emptyenv())
+assign('Evening', 'Eve', racemap)
+assign('Twilight', 'Twi', racemap)
+assign('Afternoon', 'Aft', racemap)
+assign('Monday', 'Mon', racemap)
+assign('Tuesday', 'Tue', racemap)
+assign('Wednesday', 'Wed', racemap)
+assign('Thursday', 'Thur', racemap)
+assign('Friday', 'Fri', racemap)
+assign('Saturday', 'Sat', racemap)
+assign('Sunday', 'Sun', racemap)
+assign('Evening', 'Eve', racemap)
+
+#Fileds in excel
 racevector <-
   distancevector <-
   gradevector <-
@@ -40,12 +56,19 @@ for (k in 1:pages) {
   for (i in 1:2) {
     if (grepl('charts' , lines[i] , ignore.case = TRUE)) {
       breakPoints <- unlist(gregexpr(pattern = ',', lines[i]))
-      
+      #SL
       if (length(breakPoints) > 1) {
         RaceDate <- trimws(substr(lines[i], breakPoints[1] + 1, breakPoints[2]))
       }
+      #OP
       else {
         RaceDate <- trimws(substr(lines[i], breakPoints[1] + 1, nchar(lines[i])))
+      }
+      #logic for friEve
+      for (v in ls(racemap)) {
+        if (grepl(v , lines[i] , ignore.case = TRUE)) {
+          RaceDate <- paste(RaceDate,racemap[[v]],sep = '')
+        }
       }
     }
   }
