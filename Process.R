@@ -153,7 +153,7 @@ for (line in lines){
 
 
 #Get the remaing part of the pdf if only it exists
-if (max(nchar(lines) < 130)) { 
+if (max(nchar(lines) > 130)) { 
 
 for (line in lines){
   if (!is.null(line) && !nchar(trimws(line)) == 0 ){
