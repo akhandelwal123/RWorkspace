@@ -197,6 +197,7 @@ for (k in 1:pages) {
         }
         #logic for win place show
         else {
+          myflag = TRUE
           for (j in 1:3) {
             if (j == 1) {
               if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
@@ -205,6 +206,7 @@ for (k in 1:pages) {
               else {
                 show  <- ' '
                 winperson <- paste(revSecondSplit[1])
+                myflag = FALSE
               }
             }
             if (j == 3) {
@@ -214,7 +216,9 @@ for (k in 1:pages) {
               }
               else {
                 win  <- ' '
+                if (myflag) {
                 winperson <- paste(revSecondSplit[3])
+                }
               }
             }
             if (j == 2) {
@@ -223,7 +227,10 @@ for (k in 1:pages) {
               }
               else {
                 place  <- ' '
+                if (myflag) {
                 winperson <- paste(revSecondSplit[2])
+                }
+                myflag = FALSE
               }
             }
           }
@@ -361,14 +368,17 @@ for (k in 1:pages) {
           }
           #logic for win place show
           else {
+            myflag = TRUE
             for (j in 1:3) {
               if (j == 1) {
+                #fixed is true as . is itself a pattern in R
                 if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
                   show  <-  revSecondSplit[j]
                 }
                 else {
                   show  <- ' '
                   winperson <- paste(revSecondSplit[1])
+                  myflag = FALSE
                 }
               }
               if (j == 3) {
@@ -378,7 +388,9 @@ for (k in 1:pages) {
                 }
                 else {
                   win  <- ' '
-                  winperson <- paste(revSecondSplit[3])
+                  if (myflag) {
+                    winperson <- paste(revSecondSplit[3])
+                  }
                 }
               }
               if (j == 2) {
@@ -387,7 +399,10 @@ for (k in 1:pages) {
                 }
                 else {
                   place  <- ' '
-                  winperson <- paste(revSecondSplit[2])
+                  if (myflag) {
+                    winperson <- paste(revSecondSplit[2])
+                  }
+                  myflag = FALSE
                 }
               }
             }
@@ -437,9 +452,23 @@ for (r in 1 : length(Quinella)) {
 
 # handling win place show to fit exactly at same place as required
 
-# for ( nm in Name) {
-#   if (
-# }
+for ( nm in Name) {
+  check = TRUE
+  for (m in ls(wps)) {
+    if (grepl(m, nm , fixed = TRUE)) {
+      Win <- c(Win ,wps[[m]][1])
+      Place <- c(Place ,wps[[m]][2])
+      Show <- c(Show ,wps[[m]][3])
+      check = FALSE
+      break
+    }
+  }
+  if (check){
+    Win <- c(Win ,'')
+    Place <- c(Place ,'')
+    Show <- c(Show , '')
+  }
+}
 
 
 ############################################Creating Data Frame
