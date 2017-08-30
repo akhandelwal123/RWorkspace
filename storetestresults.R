@@ -1,3 +1,14 @@
+# 6.
+# x <- c("M", "C" ,"D", "B", "C", "D", "A", "C", "B", "A", "B", "B", "C", "D", "A")
+# y <- c(' ',' ',' ',' ',' ',' ',' ')
+# z <- c(1,9,17,25,33,41,49,57,64,72,80,88,96,104,112)
+# for (i in z) {
+#   x <- append(x,y,i)
+# }
+# length(x)
+# x
+
+
 # 5.
 # racemap <- new.env(hash=T, parent=emptyenv())
 # assign('Evening', 'Eve', racemap)

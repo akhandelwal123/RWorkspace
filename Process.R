@@ -20,15 +20,19 @@ assign('Saturday', 'Sat', racemap)
 assign('Sunday', 'Sun', racemap)
 assign('Evening', 'Eve', racemap)
 
+#WPSMaps
+wps <- new.env(hash=T)
+
+
 #Fileds in excel
-racevector <-
-  distancevector <-
-  gradevector <-
+RaceNumber <-
+  Distance <-
+  Grade <-
   Name <-
   StartingPosition <-
   FinishingPosition <- Time <- FinalOdds <- Win <-
   Place <-
-  Show <- Quinella <- Perfecta <- Trifecta <- Superfecta <- c()
+  Show <- Quinella <- Perfecta <- Trifecta <- Superfecta <- Winplaceshow <- c()
 
 track =TRUE
 
@@ -80,23 +84,23 @@ for (k in 1:pages) {
       #get the RN , Grade , Distance elements
       if (grepl('Distance' , x , ignore.case = TRUE))
       {
-        RaceNumber <- trimws(substr(x, 1, 4))
-        Grade <- trimws(substr(x, 12, 13))
-        Distance <- trimws(substr(x, 24, 27))
-        racevector <- c(racevector, RaceNumber)
-        distancevector <- c(distancevector, Distance)
-        gradevector <- c(gradevector, Grade)
+        rn <- trimws(substr(x, 1, 4))
+        gd <- trimws(substr(x, 12, 13))
+        dist <- trimws(substr(x, 24, 27))
+        RaceNumber <- c(RaceNumber, rn)
+        Distance <- c(Distance, dist)
+        Grade <- c(Grade, gd)
         
       }
       #same thing as above but for another pdf
       else if (grepl('RACE' , x , ignore.case = TRUE))
       {
-        RaceNumber <- trimws(substr(x, 5, 7))
-        Grade <- trimws(substr(x, 14, 17))
-        Distance <- trimws(substr(x, 18, 22))
-        racevector <- c(racevector, RaceNumber)
-        distancevector <- c(distancevector, Distance)
-        gradevector <- c(gradevector, Grade)
+        rn <- trimws(substr(x, 5, 7))
+        gd <- trimws(substr(x, 14, 17))
+        dist <- trimws(substr(x, 18, 22))
+        RaceNumber <- c(RaceNumber, rn)
+        Distance <- c(Distance, dist)
+        Grade <- c(Grade, gd)
       }
       
       #get the rest of the data
@@ -194,18 +198,38 @@ for (k in 1:pages) {
         #logic for win place show
         else {
           for (j in 1:3) {
-            if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
-              if (j == 1) {
-                Show  <- c(Show, revSecondSplit[j])
+            if (j == 1) {
+              if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                show  <-  revSecondSplit[j]
               }
-              if (j == 3) {
-                Win <- c(Win, revSecondSplit[j])
+              else {
+                show  <- ' '
+                winperson <- paste(revSecondSplit[1])
               }
-              if (j == 2) {
-                Place <- c(Place, revSecondSplit[j])
+            }
+            if (j == 3) {
+              if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                win <- revSecondSplit[j]
+                winperson <- paste(revSecondSplit[4])
+              }
+              else {
+                win  <- ' '
+                winperson <- paste(revSecondSplit[3])
+              }
+            }
+            if (j == 2) {
+              if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                place <- revSecondSplit[j]
+              }
+              else {
+                place  <- ' '
+                winperson <- paste(revSecondSplit[2])
               }
             }
           }
+        Winplaceshow <-  c(win,place,show)
+          # wps$winperson <- Winplaceshow
+         assign(winperson, Winplaceshow , wps, inherits = FALSE)
         }
       }
     }
@@ -223,23 +247,23 @@ for (k in 1:pages) {
         if (!is.null(x) && !nchar(trimws(x)) == 0) {
         if (grepl('Distance' , x , ignore.case = TRUE))
         {
-          RaceNumber <- trimws(substr(x, 1, 4))
-          Grade <- trimws(substr(x, 12, 13))
-          Distance <- trimws(substr(x, 24, 27))
-          racevector <- c(racevector, RaceNumber)
-          distancevector <- c(distancevector, Distance)
-          gradevector <- c(gradevector, Grade)
+          rn <- trimws(substr(x, 1, 4))
+          gd <- trimws(substr(x, 12, 13))
+          dist <- trimws(substr(x, 24, 27))
+          RaceNumber <- c(RaceNumber, rn)
+          Distance <- c(Distance, dist)
+          Grade <- c(Grade, gd)
           
         }
         #same thing as above but for another pdf
         else if (grepl('RACE' , x , ignore.case = TRUE))
         {
-          RaceNumber <- trimws(substr(x, 5, 7))
-          Grade <- trimws(substr(x, 14, 17))
-          Distance <- trimws(substr(x, 18, 22))
-          racevector <- c(racevector, RaceNumber)
-          distancevector <- c(distancevector, Distance)
-          gradevector <- c(gradevector, Grade)
+          rn <- trimws(substr(x, 5, 7))
+          gd <- trimws(substr(x, 14, 17))
+          dist <- trimws(substr(x, 18, 22))
+          RaceNumber <- c(RaceNumber, rn)
+          Distance <- c(Distance, dist)
+          Grade <- c(Grade, gd)
         }
         
         #get the rest of the data
@@ -338,18 +362,38 @@ for (k in 1:pages) {
           #logic for win place show
           else {
             for (j in 1:3) {
-              if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
-                if (j == 1) {
-                  Show  <- c(Show, revSecondSplit[j])
+              if (j == 1) {
+                if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                  show  <-  revSecondSplit[j]
                 }
-                if (j == 3) {
-                  Win <- c(Win, revSecondSplit[j])
+                else {
+                  show  <- ' '
+                  winperson <- paste(revSecondSplit[1])
                 }
-                if (j == 2) {
-                  Place <- c(Place, revSecondSplit[j])
+              }
+              if (j == 3) {
+                if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                  win <- revSecondSplit[j]
+                  winperson <- paste(revSecondSplit[4])
+                }
+                else {
+                  win  <- ' '
+                  winperson <- paste(revSecondSplit[3])
+                }
+              }
+              if (j == 2) {
+                if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+                  place <- revSecondSplit[j]
+                }
+                else {
+                  place  <- ' '
+                  winperson <- paste(revSecondSplit[2])
                 }
               }
             }
+            Winplaceshow <-  c(win,place,show)
+            # wps$winperson <- Winplaceshow
+            assign(winperson, Winplaceshow , wps, inherits = FALSE)
           }
         }
       }
@@ -365,6 +409,37 @@ for (k in 1:pages) {
 Name <- Name[-c(1, length(Name))]
 FinalOdds <- FinalOdds[-1]
 FinishingPosition <- FinishingPosition[-1]
+Time <- Time[-1]
+
+
+#Refactoring Grade , RaceNumber , Distance 
+div <- c(1,9,17,25,33,41,49,57,64,72,80,88,96,104,112)
+
+for (r in 1 : length(RaceNumber)) {
+  elem <- as.list(rep(RaceNumber[r], 7))
+  RaceNumber <- append(RaceNumber,elem,div[r])
+}
+for (r in 1 : length(Grade)) {
+  elem <- as.list(rep(Grade[r], 7))
+  Grade <- append(Grade,elem,div[r])
+}
+for (r in 1 : length(Distance)) {
+  elem <- as.list(rep(Distance[r], 7))
+  Distance <- append(Distance,elem,div[r])
+}
+for (r in 1 : length(Quinella)) {
+  elem <- as.list(rep('', 7))
+  Quinella <- append(Quinella,elem,div[r])
+  Perfecta <- append(Perfecta,elem,div[r])
+  Trifecta <- append(Trifecta,elem,div[r])
+  Superfecta <- append(Superfecta,elem,div[r])
+}
+
+# handling win place show to fit exactly at same place as required
+
+# for ( nm in Name) {
+#   if (
+# }
 
 
 ############################################Creating Data Frame
