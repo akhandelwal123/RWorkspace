@@ -1,4 +1,8 @@
 library(pdftools)
+library(rJava)
+library(xlsxjars)
+library(xlsx)
+library(WriteXLS)
 file <-
   pdf_text('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
 info <-
@@ -470,6 +474,28 @@ for ( nm in Name) {
   }
 }
 
+##converting list into data frames
+mylist <- c(Quinella,Perfecta,Trifecta,Superfecta,RaceNumber,Track,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show)
+
+
+Quinella <- c(do.call("cbind",Quinella))
+Perfecta <- c(do.call("cbind",Perfecta))
+Trifecta <- c(do.call("cbind",Trifecta))
+Superfecta <- c(do.call("cbind",Superfecta))
+RaceNumber <- c(do.call("cbind",RaceNumber))
+Grade <- c(do.call("cbind",Grade))
+StartingPosition <- c(do.call("cbind",StartingPosition))
+FinishingPosition <- c(do.call("cbind",FinishingPosition))
+Distance <- c(do.call("cbind",Distance))
+Time <- c(do.call("cbind",Time))
+Win <- c(do.call("cbind",Win))
+Place <- c(do.call("cbind",Place))
+Show <- c(do.call("cbind",Show))
 
 ############################################Creating Data Frame
-#exportDataToExcel <- data.frame(Name,)
+exportDataToExcel <- data.frame(Name,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Perfecta,Trifecta,Superfecta)
+# write(exportDataToExcel, file = 'C:\\abhiimpdata\\R\\excel\\test.xlsx')
+#WriteXLS(exportDataToExcel , ExcelFileName = 'C:\\abhiimpdata\\R\\excel\\test.xlsx')
+write.xlsx(exportDataToExcel,"D:/dummy.xlsx",sheetName = "Newdata")
+#exportDataToExcel <- data.frame(Name,RaceDate,Track,Perfecta)
+head(exportDataToExcel)
