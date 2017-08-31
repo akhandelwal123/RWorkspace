@@ -40,6 +40,14 @@ RaceNumber <-
 
 track =TRUE
 
+# function to filter the characters 
+filterChar <- function(c){
+  y <- unique(na.omit(unlist(strsplit(unlist(c), "[^a-zA-Z's]+"))))
+  z <- paste(y, collapse = ' ')
+  return (trimws(z))
+}
+
+
 for (k in 1:pages) {
   pdfTextFile <- strsplit(file[[k]], "\n")[[1]]
   lines <- strsplit(pdfTextFile, "\n")
@@ -167,7 +175,7 @@ for (k in 1:pages) {
         secondSplit[lapply(secondSplit, length) > 0]
         secondSplit <- Filter(length, secondSplit)
         if (!(grepl('NULL' ,secondSplit[1]) | grepl("\\d", secondSplit[1]))) {
-          nameCol <- paste(secondSplit[1], secondSplit[2])
+          nameCol <- filterChar(c(secondSplit[1],secondSplit[2],secondSplit[3],secondSplit[4]))
           Name <- c(Name, nameCol)
         }
         for(l in 4:6) {
@@ -209,19 +217,19 @@ for (k in 1:pages) {
               }
               else {
                 show  <- ' '
-                winperson <- paste(revSecondSplit[1])
+                winperson <- filterChar(revSecondSplit)
                 myflag = FALSE
               }
             }
             if (j == 3) {
               if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
                 win <- revSecondSplit[j]
-                winperson <- paste(revSecondSplit[4])
+                winperson <- filterChar(rev(revSecondSplit))
               }
               else {
                 win  <- ' '
                 if (myflag) {
-                winperson <- paste(revSecondSplit[3])
+                winperson <- filterChar(rev(revSecondSplit))
                 }
               }
             }
@@ -232,7 +240,7 @@ for (k in 1:pages) {
               else {
                 place  <- ' '
                 if (myflag) {
-                winperson <- paste(revSecondSplit[2])
+                winperson <- filterChar(rev(revSecondSplit))
                 }
                 myflag = FALSE
               }
@@ -337,7 +345,7 @@ for (k in 1:pages) {
           secondSplit[lapply(secondSplit, length) > 0]
           secondSplit <- Filter(length, secondSplit)
           if (!(grepl('NULL' ,secondSplit[1]) | grepl("\\d", secondSplit[1]))) {
-            nameCol <- paste(secondSplit[1], secondSplit[2])
+            nameCol <- filterChar(c(secondSplit[1],secondSplit[2],secondSplit[3],secondSplit[4]))
             Name <- c(Name, nameCol)
           }
           
@@ -381,19 +389,19 @@ for (k in 1:pages) {
                 }
                 else {
                   show  <- ' '
-                  winperson <- paste(revSecondSplit[1])
+                  winperson <- filterChar(rev(revSecondSplit))
                   myflag = FALSE
                 }
               }
               if (j == 3) {
                 if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
                   win <- revSecondSplit[j]
-                  winperson <- paste(revSecondSplit[4])
+                  winperson <- filterChar(rev(revSecondSplit))
                 }
                 else {
                   win  <- ' '
                   if (myflag) {
-                    winperson <- paste(revSecondSplit[3])
+                    winperson <- filterChar(rev(revSecondSplit))
                   }
                 }
               }
@@ -404,7 +412,7 @@ for (k in 1:pages) {
                 else {
                   place  <- ' '
                   if (myflag) {
-                    winperson <- paste(revSecondSplit[2])
+                    winperson <- filterChar(rev(revSecondSplit))
                   }
                   myflag = FALSE
                 }
@@ -466,7 +474,7 @@ for (r in 1 : length(Quinella)) {
 for ( nm in Name) {
   check = TRUE
   for (m in ls(wps)) {
-    if (grepl(m, nm , fixed = TRUE)) {
+    if (grepl(nm, m , fixed = TRUE)) {
       Win <- c(Win ,wps[[m]][1])
       Place <- c(Place ,wps[[m]][2])
       Show <- c(Show ,wps[[m]][3])
