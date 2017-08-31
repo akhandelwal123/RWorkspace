@@ -433,19 +433,26 @@ Time <- Time[-1]
 
 #Refactoring Grade , RaceNumber , Distance 
 div <- c(1,9,17,25,33,41,49,57,64,72,80,88,96,104,112)
-
-for (r in 1 : length(RaceNumber)) {
-  elem <- as.list(rep(RaceNumber[r], 7))
-  RaceNumber <- append(RaceNumber,elem,div[r])
+h <- 1
+for (r in div) {
+  elemr <- as.list(rep(RaceNumber[r], 7))
+  elemg <- as.list(rep(Grade[r], 7))
+  elemd <- as.list(rep(Distance[r], 7))
+  RaceNumber <- append(RaceNumber,elemr,div[h])
+  Grade <- append(Grade,elemg,div[h])
+  Distance <- append(Distance,elemd,div[h])
+  h <- h+1
 }
-for (r in 1 : length(Grade)) {
-  elem <- as.list(rep(Grade[r], 7))
-  Grade <- append(Grade,elem,div[r])
-}
-for (r in 1 : length(Distance)) {
-  elem <- as.list(rep(Distance[r], 7))
-  Distance <- append(Distance,elem,div[r])
-}
+# h <- 1
+# for (r in 1 : length(Grade)) {
+#   elem <- as.list(rep(Grade[r], 7))
+#   Grade <- append(Grade,elem,div[r])
+# }
+# h <- 1
+# for (r in 1 : length(Distance)) {
+#   elem <- as.list(rep(Distance[r], 7))
+#   Distance <- append(Distance,elem,div[r])
+# }
 for (r in 1 : length(Quinella)) {
   elem <- as.list(rep('', 7))
   Quinella <- append(Quinella,elem,div[r])
@@ -492,8 +499,11 @@ Win <- c(do.call("cbind",Win))
 Place <- c(do.call("cbind",Place))
 Show <- c(do.call("cbind",Show))
 
+#Unique Identifier
+UniqueIdentifier <- paste(RaceDate,"_",Track,"_",RaceNumber,"_",Grade,"_",StartingPosition, sep = '')
+
 ############################################Creating Data Frame
-exportDataToExcel <- data.frame(Name,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Perfecta,Trifecta,Superfecta)
+exportDataToExcel <- data.frame(Name,UniqueIdentifier,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Perfecta,Trifecta,Superfecta)
 # write(exportDataToExcel, file = 'C:\\abhiimpdata\\R\\excel\\test.xlsx')
 #WriteXLS(exportDataToExcel , ExcelFileName = 'C:\\abhiimpdata\\R\\excel\\test.xlsx')
 write.xlsx(exportDataToExcel,"D:/dummy.xlsx",sheetName = "Newdata")
