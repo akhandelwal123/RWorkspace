@@ -12,6 +12,114 @@ filterChar <- function(c){
   return (trimws(z))
 }
 
+fitToExcelGRD <- function(div,RaceNumber,Grade,Distance) {
+  h <- 1
+  for (r in div[1:length(RaceNumber)]) {
+    elemr <- as.list(rep(RaceNumber[r], 7))
+    elemg <- as.list(rep(Grade[r], 7))
+    elemd <- as.list(rep(Distance[r], 7))
+    assign("RaceNumber",   append(RaceNumber,elemr,div[h]), envir = .GlobalEnv)
+    assign("Grade",  c(Grade, append(Grade,elemg,div[h])), envir = .GlobalEnv)
+    assign("Distance",  c(Distance, append(Distance,elemd,div[h])), envir = .GlobalEnv)
+    h <- h+1
+  }
+}
+
+fitToExcelWSP <- function(Name,wps,Win,Place,Show){
+  for ( nm in Name) {
+    check = TRUE
+    for (m in ls(wps)) {
+      if (grepl(nm, m , fixed = TRUE)) {
+        assign("Win",   wps[[m]][1], envir = .GlobalEnv)
+        assign("Place", wps[[m]][2], envir = .GlobalEnv)
+        assign("Show",  wps[[m]][3], envir = .GlobalEnv)
+        check = FALSE
+        break
+      }
+    }
+    if (check){
+      assign("Win",   ' ', envir = .GlobalEnv)
+      assign("Place", ' ', envir = .GlobalEnv)
+      assign("Show",  ' ', envir = .GlobalEnv)
+    }
+  }
+}
+
+handleQui <- function(x,flag,Trifecta,Superfecta){
+  # assign("Quinella",  c(Quinella, trimws(substr(x, 27, 33))), envir = .GlobalEnv)
+  # assign("Perfecta",  c(Perfecta, trimws(substr(x, 55, 61))), envir = .GlobalEnv)
+
+  #logic to make work for T & S
+  myValuesPos <- unlist(gregexpr(pattern = ':', x))
+  if (flag){
+     myValuesPos <- myValuesPos[3:length(myValuesPos)]
+  }
+  S <- unlist(gregexpr(pattern = 'Superfecta', x))
+  T <- unlist(gregexpr(pattern = 'Trifecta', x))
+  
+  if (S != -1) {
+    posS <- min(which(myValuesPos > S))
+    assign("Superfecta",  c(Superfecta, trimws(substr(x, myValuesPos[posS] + 1, myValuesPos[posS] + 7))), envir = .GlobalEnv)
+
+  }
+  if (T != -1) {
+    posT <- min(which(myValuesPos > T))
+    assign("Trifecta",  c(Trifecta, trimws(substr(x, myValuesPos[posT] + 1, myValuesPos[posT] + 7))), envir = .GlobalEnv)
+  }
+}
+
+handleSplit <- function(x){
+  firstSplit <- strsplit(x[[1]], " ")[[1]]
+  secondSplit <- strsplit(firstSplit, " ")
+  secondSplit[lapply(secondSplit, length) > 0]
+  secondSplit <- Filter(length, secondSplit)
+  return (secondSplit)
+}
+handleWPS <- function(revSecondSplit,Win,Place,Show){
+  myflag = TRUE
+  for (j in 1:3) {
+    if (j == 1) {
+      #fixed is true as . is itself a pattern in R
+      if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+        show  <-  revSecondSplit[j]
+      }
+      else {
+        show  <- ' '
+        winperson <- filterChar(rev(revSecondSplit))
+        myflag = FALSE
+      }
+    }
+    if (j == 3) {
+      if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+        win <- revSecondSplit[j]
+        winperson <- filterChar(rev(revSecondSplit))
+      }
+      else {
+        win  <- ' '
+        if (myflag) {
+          winperson <- filterChar(rev(revSecondSplit))
+        }
+      }
+    }
+    if (j == 2) {
+      if (grepl("." , revSecondSplit[j] , fixed = TRUE)) {
+        place <- revSecondSplit[j]
+      }
+      else {
+        place  <- ' '
+        if (myflag) {
+          winperson <- filterChar(rev(revSecondSplit))
+        }
+        myflag = FALSE
+      }
+    }
+  }
+  Winplaceshow <-  c(win,place,show)
+  # wps$winperson <- Winplaceshow
+  assign(winperson, Winplaceshow , wps, inherits = FALSE)
+  
+}
+
 handleFoRtFp <- function(revSecondSplit,FinishingPosition,Time,FinalOdds){
   for (i in 1:10) {
     #2    1  .5  31.45 2.30 Bmpd, Kept To TasK  ==> these are 10 elemnts of revSecondSplit
@@ -55,11 +163,12 @@ handleTrack <- function(trk) {
 handleDate <- function(x){
   breakPoints <- unlist(gregexpr(pattern = ',', x))
   dat <- trimws(substr(x, breakPoints[1] + 1, nchar(x)))
-  
+  dat <- gsub("/",".",dat)
   #logic for friEve
   for (v in ls(racemap)) {
     if (grepl(v , x , ignore.case = TRUE)) {
       dat<- paste(dat,racemap[[v]],sep = '')
+      #dat <- append(dat,racemap[[v]],1)
     }
   }
   return(dat)
@@ -67,6 +176,7 @@ handleDate <- function(x){
 
 handleDistance <- function(x,RaceNumber,Distance,Grade){
   rn <- trimws(substr(x, 1, 4))
+  rn <- matches <- regmatches(rn, gregexpr("[[:digit:]]+", rn))
   gd <- trimws(substr(x, 12, 13))
   dist <- trimws(substr(x, 24, 27))
   assign("RaceNumber",  c(RaceNumber, rn), envir = .GlobalEnv) 
@@ -87,9 +197,6 @@ filteredLinesWithNumber <- function(x) {
 
 #RaceMaps
 racemap <- new.env(hash=T, parent=emptyenv())
-assign('Evening', 'Eve', racemap)
-assign('Twilight', 'Twi', racemap)
-assign('Afternoon', 'Aft', racemap)
 assign('Monday', 'Mon', racemap)
 assign('Tuesday', 'Tue', racemap)
 assign('Wednesday', 'Wed', racemap)
@@ -98,6 +205,9 @@ assign('Friday', 'Fri', racemap)
 assign('Saturday', 'Sat', racemap)
 assign('Sunday', 'Sun', racemap)
 assign('Evening', 'Eve', racemap)
+assign('Twilight', 'Twi', racemap)
+assign('Afternoon', 'Aft', racemap)
+
 
 #Tracks
 trackmap <- new.env(hash=T, parent=emptyenv())
@@ -114,6 +224,9 @@ assign('Sanford-Orlando', 'Sun', trackmap)
 assign('southland', 'SO', trackmap)
 assign('Tri State', 'TR', trackmap)
 assign('Wheeling', 'WH', trackmap)
+
+#WPSMaps
+wps <- new.env(hash=T)
 
 temp <- c()
 Track <- c()
@@ -158,33 +271,153 @@ for (k in 1:pages) {
     track =!track
   }
  
+  if (k == 1) {
+    lines <- lines[-c(1,2)]
+  }
+  
   
   #processing each line
-  for (line in lines[-c(1,2)]) {
+  for (line in lines) {
     x <- substr(line , 1 , limit / 2)
     if (!is.null(x) && !nchar(trimws(x)) == 0) {
-      if (grepl("[A-z]$", trimws(x)) && !grepl('-' , x , ignore.case = TRUE) && !grepl('/' , x , ignore.case = TRUE)) {
+      if (grepl("[A-z]$", trimws(x))) {
+        if (!grepl('/' , x , ignore.case = TRUE)) {
         # filter for main criteria
-        if (grepl('Distance' , x, ignore.case = TRUE)) {
-            handleDistance(x,RaceNumber,Distance,Grade)
-        }
-        else {
-          firstSplit <- strsplit(x[[1]], " ")[[1]]
-          secondSplit <- strsplit(firstSplit, " ")
-          secondSplit[lapply(secondSplit, length) > 0]
-          secondSplit <- Filter(length, secondSplit)
-          
-          handleName(secondSplit,Name)
-          
-          handleStartPos(secondSplit,StartingPosition)
-          
-          handleFoRtFp(rev(secondSplit),FinishingPosition,Time,FinalOdds)
+          if (grepl('Distance' , x, ignore.case = TRUE)) {
+              handleDistance(x,RaceNumber,Distance,Grade)
+          }
+          else {
+            # firstSplit <- strsplit(x[[1]], " ")[[1]]
+            # secondSplit <- strsplit(firstSplit, " ")
+            # secondSplit[lapply(secondSplit, length) > 0]
+            # secondSplit <- Filter(length, secondSplit)
+            secondSplit <- handleSplit(x)
+            
+            handleName(secondSplit,Name)
+            
+            handleStartPos(secondSplit,StartingPosition)
+            
+            handleFoRtFp(rev(secondSplit),FinishingPosition,Time,FinalOdds)
+          }
         }
       }
-      else {
-        filteredLinesWithNumber(x)
+      else if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
+          Quinella <- c(Quinella, trimws(substr(x, 27, 33)))
+          Perfecta <- c(Perfecta, trimws(substr(x, 55, 61)))
+          handleQui(x,TRUE,Trifecta,Superfecta)
+      }
+        else if (grepl('fecta' , x , ignore.case = TRUE)) {
+          handleQui(x,FALSE,Trifecta,Superfecta)
+        }
+        else {
+        secondSplit <- handleSplit(x)
+        handleWPS(rev(secondSplit),Win,Place,Show)
+        }
+      }
+    }
+  
+  
+  #Get the remaing part of the pdf if only it exists
+  if (max(nchar(lines) > 130)) {
+    for (line in lines) {
+      x <- substr(line , limit / 2 + 2 , limit)
+      if (!is.null(x) && !nchar(trimws(x)) == 0 && !grepl('/' , x , ignore.case = TRUE)) {
+        if (grepl("[A-z]$", trimws(x))) {
+          if (!grepl('/' , x , ignore.case = TRUE)) {
+          # filter for main criteria
+          if (grepl('Distance' , x, ignore.case = TRUE)) {
+            handleDistance(x,RaceNumber,Distance,Grade)
+          }
+          else {
+            secondSplit <- handleSplit(x)
+            
+            handleName(secondSplit,Name)
+            
+            handleStartPos(secondSplit,StartingPosition)
+            
+            handleFoRtFp(rev(secondSplit),FinishingPosition,Time,FinalOdds)
+          }
+          }
+        }
+        else if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
+          Quinella <- c(Quinella, trimws(substr(x, 27, 33)))
+          Perfecta <- c(Perfecta, trimws(substr(x, 55, 61)))
+          handleQui(x,TRUE,Trifecta,Superfecta)
+        }
+          else if (grepl('fecta' , x , ignore.case = TRUE)) {
+            handleQui(x,FALSE,Trifecta,Superfecta)
+          }
+          else {
+            secondSplit <- handleSplit(x)
+            handleWPS(rev(secondSplit),Win,Place,Show)
+          }
+        }
       }
     }
   }
+
+
+#Refactoring Grade , RaceNumber , Distance 
+div <- c(1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153)
+
+h <- 1
+for (r in div[1:length(RaceNumber)]) {
+  elemr <- as.list(rep(RaceNumber[r], 7))
+  elemg <- as.list(rep(Grade[r], 7))
+  elemd <- as.list(rep(Distance[r], 7))
+  RaceNumber <- append(RaceNumber,elemr,div[h])
+  Grade <- append(Grade,elemg,div[h])
+  Distance <- append(Distance,elemd,div[h])
+  h <- h+1
 }
-  
+
+
+for (r in 1 : length(Quinella)) {
+  elem <- as.list(rep('', 7))
+  Quinella <- append(Quinella,elem,div[r])
+  Perfecta <- append(Perfecta,elem,div[r])
+  Trifecta <- append(Trifecta,elem,div[r])
+  Superfecta <- append(Superfecta,elem,div[r])
+}
+
+# handling win place show to fit exactly at same place as required
+for ( nm in Name) {
+  check = TRUE
+  for (m in ls(wps)) {
+    if (grepl(nm, m , fixed = TRUE)) {
+      Win <- c(Win ,wps[[m]][1])
+      Place <- c(Place ,wps[[m]][2])
+      Show <- c(Show ,wps[[m]][3])
+      check = FALSE
+      break
+    }
+  }
+  if (check){
+    Win <- c(Win ,'')
+    Place <- c(Place ,'')
+    Show <- c(Show , '')
+  }
+}
+
+
+Quinella <- c(do.call("cbind",Quinella))
+Perfecta <- c(do.call("cbind",Perfecta))
+Trifecta <- c(do.call("cbind",Trifecta))
+Superfecta <- c(do.call("cbind",Superfecta))
+RaceNumber <- c(do.call("cbind",RaceNumber))
+Grade <- c(do.call("cbind",Grade))
+StartingPosition <- c(do.call("cbind",StartingPosition))
+FinishingPosition <- c(do.call("cbind",FinishingPosition))
+Distance <- c(do.call("cbind",Distance))
+Time <- c(do.call("cbind",Time))
+Win <- c(do.call("cbind",Win))
+Place <- c(do.call("cbind",Place))
+Show <- c(do.call("cbind",Show))
+
+#Unique Identifier
+UniqueIdentifier <- paste(RaceDate,"_",Track,"_",RaceNumber,"_",Grade,"_",StartingPosition, sep = '')
+
+#####Exporting to excel
+exportDataToExcel <- data.frame(Name,UniqueIdentifier,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Perfecta,Trifecta,Superfecta, check.rows= FALSE)
+write.xlsx(exportDataToExcel,"D:/dummy1.xlsx",sheetName = "Newdata1")
+
