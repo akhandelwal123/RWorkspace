@@ -12,6 +12,7 @@ filterChar <- function(c){
 }
 
 
+
 handleSplit <- function(x){
   firstSplit <- strsplit(x[[1]], " ")[[1]]
   secondSplit <- strsplit(firstSplit, " ")
@@ -115,15 +116,18 @@ handleTrackSO <- function(trk) {
 handleDateSO <- function(x){
   breakPoints <- unlist(gregexpr(pattern = ',', x))
   dat <- trimws(substr(x, breakPoints[1] + 1, breakPoints[2]))
-  #dat <- gsub("/",".",dat)
-  #logic for friEve
+  breakPoints1 <- unlist(gregexpr(pattern = ' ', dat))
+  dat1 <- trimws(substr(dat, 1, breakPoints1[1]))
+  dat2 <-  get(tolower(dat1),calmap)
+  newdat <- paste(dat2, trimws(substr(dat, breakPoints1[1]+1, breakPoints1[1]+2)) ,sep ='/')
+  newdat <- paste(newdat,'17',sep ='/')
   for (v in ls(racemap)) {
     if (grepl(v , x , ignore.case = TRUE)) {
-      dat<- paste(dat,racemap[[v]],sep = '')
+      newdat<- paste(newdat,racemap[[v]],sep = '')
       #dat <- append(dat,racemap[[v]],1)
     }
   }
-  return(dat)
+  return(newdat)
 }
 
 handleDistanceSO <- function(x,RaceNumber,Distance,Grade){
@@ -168,6 +172,21 @@ assign('southland', 'SO', trackmap)
 assign('tri state', 'TR', trackmap)
 assign('wheeling', 'WH', trackmap)
 
+#Cal
+calmap <- new.env(hash=T, parent=emptyenv())
+assign('january', '1', calmap)
+assign('february', '2', calmap)
+assign('march', '3', calmap)
+assign('april', '4', calmap)
+assign('may', '5', calmap)
+assign('june', '6', calmap)
+assign('july', '7', calmap)
+assign('august', '8', calmap)
+assign('september', '9', calmap)
+assign('october', '10', calmap)
+assign('november', '11', calmap)
+assign('december', '12', calmap)
+
 #WPSMaps
 wps <- new.env(hash=T)
 
@@ -179,11 +198,11 @@ RaceNumber <-  Distance <-  Grade <-  Name <-  StartingPosition <-
   FinishingPosition <- Time <- FinalOdds <- Win <-  Place <-
   Show <- Quinella <- Exacta <- Trifecta <- DimeSuper <- Winplaceshow <- c()
 track = TRUE
-
+# 
 # file <-
-#   pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug24-Thursday-Twilight-Charts.pdf')
+#   pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
 # info <-
-#   pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug24-Thursday-Twilight-Charts.pdf')
+#   pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
 
 file <-
   pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Fri-Twi-8-18-charts.pdf')
@@ -219,7 +238,7 @@ for (k in 1:pages) {
   
   for (line in lines) {
     x <- substr(line , 1 , limit / 2)
-    if (!is.null(x) && !nchar(trimws(x)) == 0) {
+    if (!is.null(x) && !nchar(trimws(x)) == 0 && substr(x,1,1) != '$') {
       
       if (grepl("[A-z]$", trimws(x))) {
         
@@ -295,7 +314,7 @@ for (k in 1:pages) {
     #processing each line
     for (line in lines) {
       x <- substr(line , limit / 2 + 2 , limit)
-      if (!is.null(x) && !nchar(trimws(x)) == 0) {
+      if (!is.null(x) && !nchar(trimws(x)) == 0 && substr(x,1,1) != '$') {
         if (grepl("[A-z]$", trimws(x))) {
           if (!grepl('/' , x , ignore.case = TRUE)) {
             # filter for main criteria
@@ -389,6 +408,11 @@ for (r in 1 : length(tempry)) {
   DimeSuper <- append(DimeSuper,elem,temp[r]+1)
 }
 
+#only for SOUTHLAND-Aug18-Friday-Evening-Charts
+if(length(Quinella) > length(Name)){
+  Quinella <- Quinella[-length(Name)]
+}
+
 # handling win place show to fit exactly at same place as required
 for ( nm in Name) {
   check = TRUE
@@ -428,4 +452,4 @@ UniqueIdentifier <- paste(RaceDate,"_",Track,"_",RaceNumber,"_",Grade,"_",Starti
 
 #####Exporting to excel
 exportDataToExcel <- data.frame(Name,UniqueIdentifier,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Exacta,Trifecta,DimeSuper, check.rows= FALSE)
-write.xlsx(exportDataToExcel,"D:/dummy3.xlsx",sheetName = "Newdata2")
+write.xlsx(exportDataToExcel,"D:/dummy2.xlsx",sheetName = "Newdata2")
