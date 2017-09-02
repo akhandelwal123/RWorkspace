@@ -321,7 +321,7 @@ for (k in 1:pages) {
   if (max(nchar(lines) > 130)) {
     for (line in lines) {
       x <- substr(line , limit / 2 + 2 , limit)
-      if (!is.null(x) && !nchar(trimws(x)) == 0 && !grepl('/' , x , ignore.case = TRUE)) {
+      if (!is.null(x) && !nchar(trimws(x)) == 0) {
         if (grepl("[A-z]$", trimws(x))) {
           if (!grepl('/' , x , ignore.case = TRUE)) {
           # filter for main criteria
