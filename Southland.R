@@ -177,8 +177,12 @@ handleDate <- function(x){
 handleDistance <- function(x,RaceNumber,Distance,Grade){
   rn <- trimws(substr(x, 1, 4))
   rn <- matches <- regmatches(rn, gregexpr("[[:digit:]]+", rn))
-  gd <- trimws(substr(x, 12, 13))
-  dist <- trimws(substr(x, 24, 27))
+  bb <- unlist(gregexpr(pattern = 'Grade', x))
+  gd <- substr(x,bb[1]+nchar("Grade") +1,bb[1]+nchar("Grade")+3)
+ # gd <- trimws(substr(x, 12, 13))
+  gd <- regmatches(gd, gregexpr("[A-z]+", gd))
+  dist <- trimws(substr(x, 24, 29))
+  dist <- regmatches(dist, gregexpr("[[:digit:]]+", dist))
   assign("RaceNumber",  c(RaceNumber, rn), envir = .GlobalEnv) 
   assign("Distance",  c(Distance, dist), envir = .GlobalEnv) 
   assign("Grade",  c(Grade, gd), envir = .GlobalEnv) 
@@ -243,9 +247,9 @@ track = TRUE
 #   pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug24-Thursday-Twilight-Charts.pdf')
 
 file <-
-  pdf_text('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
+  pdf_text('C://abhiimpdata//R//ORANGE-PARK-Aug23-Wednesday-Evening-Charts.pdf')
 info <-
-  pdf_info('C://abhiimpdata//R//ORANGE-PARK-Aug18-Friday-Evening-Charts.pdf')
+  pdf_info('C://abhiimpdata//R//ORANGE-PARK-Aug23-Wednesday-Evening-Charts.pdf')
 
 pages <- info$pages
 
@@ -278,83 +282,142 @@ for (k in 1:pages) {
   
   #processing each line
   for (line in lines) {
-    x <- substr(line , 1 , limit / 2)
+    x <- substr(line , 1 , (limit/2 - 1))
     if (!is.null(x) && !nchar(trimws(x)) == 0) {
-      if (grepl("[A-z]$", trimws(x))) {
+      #end would be string
+      if (grepl("[A-z.]$", trimws(x))) {
         if (!grepl('/' , x , ignore.case = TRUE)) {
         # filter for main criteria
           if (grepl('Distance' , x, ignore.case = TRUE)) {
               handleDistance(x,RaceNumber,Distance,Grade)
+
+            if(length(RaceNumber) - length(Trifecta) >= 2 ) {
+              Trifecta <- c(Trifecta,' ')
+            }
+            if(length(RaceNumber) - length(Superfecta) >= 2  ) {
+              Superfecta <- c(Superfecta,' ')
+            }
           }
           else {
-            # firstSplit <- strsplit(x[[1]], " ")[[1]]
-            # secondSplit <- strsplit(firstSplit, " ")
-            # secondSplit[lapply(secondSplit, length) > 0]
-            # secondSplit <- Filter(length, secondSplit)
+            if (!grepl(':' , x , ignore.case = TRUE)) {
             secondSplit <- handleSplit(x)
-            
+
             handleName(secondSplit,Name)
-            
+
             handleStartPos(secondSplit,StartingPosition)
-            
+
             handleFoRtFp(rev(secondSplit),FinishingPosition,Time,FinalOdds)
+
+            }
           }
         }
       }
-      else if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
-          Quinella <- c(Quinella, trimws(substr(x, 27, 33)))
-          Perfecta <- c(Perfecta, trimws(substr(x, 55, 61)))
-          handleQui(x,TRUE,Trifecta,Superfecta)
-      }
-        else if (grepl('fecta' , x , ignore.case = TRUE)) {
-          handleQui(x,FALSE,Trifecta,Superfecta)
-        }
-        else {
+      else if (!grepl('Quinella' , x , ignore.case = TRUE) && !grepl('fecta' , x , ignore.case = TRUE)) {
         secondSplit <- handleSplit(x)
         handleWPS(rev(secondSplit),Win,Place,Show)
+      }
+      else {
+          if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Exotics: Quinella', x))
+            val<- substr(x,nchar("Exotics: Quinella") +10,nchar("Exotics: Quinella")+16)
+            Quinella <- c(Quinella, trimws(val))
+          }
+        if (grepl('Perfecta' , x , fixed = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Perfecta', x))
+            val<- substr(x,bb[1]+nchar("Perfecta") +10,bb[1]+nchar("Perfecta")+16)
+            Perfecta <- c(Perfecta, trimws(val))
+        }
+        if (grepl('Trifecta' , x , ignore.case = TRUE) && !grepl('Twin Trifecta' , x , ignore.case = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Trifecta', x))
+            val <- substr(x,bb[1]+nchar("Trifecta") +12,bb[1]+nchar("Trifecta")+18)
+            Trifecta <- c(Trifecta, trimws(val))
+        }
+        if (grepl('Superfecta' , x , ignore.case = TRUE)){
+          bb <- unlist(gregexpr(pattern = 'Superfecta', x))
+          if (bb == 1) {
+            val<- substr(x,nchar("Superfecta") + 14,nchar("Superfecta") + 20)
+          }
+          else {
+          val <- substr(x, bb[1] + nchar("Superfecta") + 14, bb[1] + nchar("Superfecta") + 20)
+          }
+          Superfecta <- c(Superfecta, trimws(val))
+        }
+
         }
       }
     }
   
-  
-  #Get the remaing part of the pdf if only it exists
+  # 
+  # #Get the remaing part of the pdf if only it exists
   if (max(nchar(lines) > 130)) {
     for (line in lines) {
-      x <- substr(line , limit / 2 + 2 , limit)
+      x <- substr(line , limit / 2 , limit)
+      if (unlist(gregexpr("[a-z]", substr(x,1,1))) != -1){
+      x <- substr(x,2,limit)
+      }
       if (!is.null(x) && !nchar(trimws(x)) == 0) {
-        if (grepl("[A-z]$", trimws(x))) {
+        if (grepl("[A-z.]$", trimws(x))) {
           if (!grepl('/' , x , ignore.case = TRUE)) {
           # filter for main criteria
           if (grepl('Distance' , x, ignore.case = TRUE)) {
             handleDistance(x,RaceNumber,Distance,Grade)
+
+            if(length(RaceNumber) - length(Trifecta) >= 2 ) {
+              Trifecta <- c(Trifecta,' ')
+            }
+            if(length(RaceNumber) - length(Superfecta) >= 2 ) {
+              Superfecta <- c(Superfecta,' ')
+            }
           }
           else {
+            if (!grepl(':' , x , ignore.case = TRUE)) {
             secondSplit <- handleSplit(x)
-            
+
             handleName(secondSplit,Name)
-            
+
             handleStartPos(secondSplit,StartingPosition)
-            
+
             handleFoRtFp(rev(secondSplit),FinishingPosition,Time,FinalOdds)
+            }
           }
           }
         }
-        else if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
-          Quinella <- c(Quinella, trimws(substr(x, 27, 33)))
-          Perfecta <- c(Perfecta, trimws(substr(x, 55, 61)))
-          handleQui(x,TRUE,Trifecta,Superfecta)
+        else if (!grepl('Quinella' , x , ignore.case = TRUE) && !grepl('fecta' , x , ignore.case = TRUE)) {
+          secondSplit <- handleSplit(x)
+          handleWPS(rev(secondSplit),Win,Place,Show)
         }
-          else if (grepl('fecta' , x , ignore.case = TRUE)) {
-            handleQui(x,FALSE,Trifecta,Superfecta)
+        else {
+          if (grepl('Exotics: Quinella' , x , ignore.case = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Exotics: Quinella', x))
+            val<- substr(x,nchar("Exotics: Quinella") +10,nchar("Exotics: Quinella")+16)
+            Quinella <- c(Quinella, trimws(val))
           }
-          else {
-            secondSplit <- handleSplit(x)
-            handleWPS(rev(secondSplit),Win,Place,Show)
+          if (grepl('Perfecta' , x , fixed = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Perfecta', x))
+            val<- substr(x,bb[1]+nchar("Perfecta") +10,bb[1]+nchar("Perfecta")+16)
+            Perfecta <- c(Perfecta, trimws(val))
           }
+          if (grepl('Trifecta' , x , ignore.case = TRUE) && !grepl('Twin Trifecta' , x , ignore.case = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Trifecta', x))
+            val <- substr(x,bb[1]+nchar("Trifecta") +12,bb[1]+nchar("Trifecta")+18)
+            Trifecta <- c(Trifecta, trimws(val))
+          }
+          if (grepl('Superfecta' , x , ignore.case = TRUE)){
+            bb <- unlist(gregexpr(pattern = 'Superfecta', x))
+            if (bb == 1) {
+              val<- substr(x,nchar("Superfecta") + 14,nchar("Superfecta") + 20)
+            }
+            else {
+              val <- substr(x, bb[1] + nchar("Superfecta") + 14, bb[1] + nchar("Superfecta") + 20)
+            }
+            Superfecta <- c(Superfecta, trimws(val))
+          }
+
         }
       }
     }
   }
+}
 
 
 #Refactoring Grade , RaceNumber , Distance 
@@ -399,6 +462,13 @@ for ( nm in Name) {
   }
 }
 
+#only for ORANGE-PARK-Evening-Charts
+if(length(Trifecta) > length(Name)){
+  Trifecta <- Trifecta[-length(Name)]
+}
+if(length(Superfecta) > length(Name)){
+  Superfecta <- Superfecta[-length(Name)]
+}
 
 Quinella <- c(do.call("cbind",Quinella))
 Perfecta <- c(do.call("cbind",Perfecta))
@@ -419,5 +489,5 @@ UniqueIdentifier <- paste(RaceDate,"_",Track,"_",RaceNumber,"_",Grade,"_",Starti
 
 #####Exporting to excel
 exportDataToExcel <- data.frame(Name,UniqueIdentifier,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Perfecta,Trifecta,Superfecta, check.rows= FALSE)
-write.xlsx(exportDataToExcel,"D:/dummy1.xlsx",sheetName = "Newdata1")
+write.xlsx(exportDataToExcel,"D:/dummy3.xlsx",sheetName = "Newdata1")
 
