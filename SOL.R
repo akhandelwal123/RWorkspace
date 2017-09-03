@@ -119,8 +119,8 @@ handleDateSO <- function(x){
   breakPoints1 <- unlist(gregexpr(pattern = ' ', dat))
   dat1 <- trimws(substr(dat, 1, breakPoints1[1]))
   dat2 <-  get(tolower(dat1),calmap)
-  newdat <- paste(dat2, trimws(substr(dat, breakPoints1[1]+1, breakPoints1[1]+2)) ,sep ='/')
-  newdat <- paste(newdat,'17',sep ='/')
+  newdat <- paste(dat2, trimws(substr(dat, breakPoints1[1]+1, breakPoints1[1]+2)) ,sep ='.')
+  newdat <- paste(newdat,'17',sep ='.')
   for (v in ls(racemap)) {
     if (grepl(v , x , ignore.case = TRUE)) {
       newdat<- paste(newdat,racemap[[v]],sep = '')
