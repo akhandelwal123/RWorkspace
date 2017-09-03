@@ -72,8 +72,8 @@ handleFoRtFp <- function(revSecondSplit,FinishingPosition,Time,FinalOdds){
     if (!grepl("^[A-Za-z,&1st\r]+$", revSecondSplit[i], perl = T)) {
       fo <- revSecondSplit[i]
       rt <- revSecondSplit[i + 1]
-      if (revSecondSplit [i + 3] != 'NULL'){
-      fp <- revSecondSplit [i + 3]
+      if (revSecondSplit [i + 2] != 'NULL'){
+      fp <- substr(revSecondSplit [i + 2],1,1)
       }
       else {
       fp  <- ' '
@@ -124,16 +124,25 @@ handleDateSO <- function(x){
   for (v in ls(racemap)) {
     if (grepl(v , x , ignore.case = TRUE)) {
       newdat<- paste(newdat,racemap[[v]],sep = '')
-      #dat <- append(dat,racemap[[v]],1)
     }
   }
+  for (v in ls(racemaptwo)) {
+    if (grepl(v , x , ignore.case = TRUE)) {
+      newdat<- paste(newdat,racemaptwo[[v]],sep = '')
+    }
+  }
+  # newdat <- paste(substr(newdat,1,nchar(newdat)-6),substr(newdat,nchar(newdat)-2,nchar(newdat)),substr(newdat,nchar(newdat)-5,nchar(newdat)-3) ,sep = '')
   return(newdat)
 }
 
 handleDistanceSO <- function(x,RaceNumber,Distance,Grade){
   rn <- trimws(substr(x, 5, 8))
   rn <- regmatches(rn, gregexpr("[[:digit:]]+", rn))
-  gd <- trimws(substr(x, 14, 16))
+  # gd <- trimws(substr(x, 14, 16))
+  # gd <- regmatches(gd, gregexpr("[A-z]+", gd))
+  bb <- unlist(gregexpr(pattern = 'Grade', x))
+  gd <- substr(x,bb[1]+nchar("Grade") +1,bb[1]+nchar("Grade")+3)
+  # gd <- trimws(substr(x, 12, 13))
   gd <- regmatches(gd, gregexpr("[A-z]+", gd))
   dist <- trimws(substr(x, 15, 20))
   dist <- regmatches(dist, gregexpr("[[:digit:]]+", dist))
@@ -151,10 +160,13 @@ assign('Thursday', 'Thur', racemap)
 assign('Friday', 'Fri', racemap)
 assign('Saturday', 'Sat', racemap)
 assign('Sunday', 'Sun', racemap)
-assign('Evening', 'Eve', racemap)
-assign('Twilight', 'Twi', racemap)
-assign('Afternoon', 'Aft', racemap)
 
+
+#racemap <- new.env(hash=T, parent=emptyenv())
+racemaptwo <- new.env(hash=T, parent=emptyenv())
+assign('Evening', 'Eve', racemaptwo)
+assign('Twilight', 'Twi', racemaptwo)
+assign('Afternoon', 'Aft', racemaptwo)
 
 #Tracks
 trackmap <- new.env(hash=T, parent=emptyenv())
@@ -199,15 +211,15 @@ RaceNumber <-  Distance <-  Grade <-  Name <-  StartingPosition <-
   Show <- Quinella <- Exacta <- Trifecta <- DimeSuper <- Winplaceshow <- c()
 track = TRUE
 # 
-# file <-
-#   pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
-# info <-
-#   pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
-
 file <-
-  pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Fri-Twi-8-18-charts.pdf')
+  pdf_text('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
 info <-
-  pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Fri-Twi-8-18-charts.pdf')
+  pdf_info('C://abhiimpdata//R//pdfs//SOUTHLAND-Aug18-Friday-Evening-Charts.pdf')
+
+# file <-
+#   pdf_text('C://abhiimpdata//R//pdfs//Southland-Sat-Mat-8-12-charts.pdf')
+# info <-
+#   pdf_info('C://abhiimpdata//R//pdfs//Southland-Sat-Mat-8-12-charts.pdf')
 
 pages <- info$pages
 
@@ -268,7 +280,7 @@ for (k in 1:pages) {
           DimeSuper <- c(DimeSuper,' ')
         }
       }
-      else if (grepl('Quiniela ' , x , ignore.case = TRUE) | grepl('Q1' , x) ){
+      else if (grepl('Quiniela ' , x , ignore.case = TRUE)){
         #Q <- c(Q, trimws(substr(x, length(x), )))
         z <- substr(x,1,which(strsplit(x, "")[[1]]=="$")-1)
         secondSplit <- handleSplit(z)
@@ -313,7 +325,10 @@ for (k in 1:pages) {
   if (max(nchar(lines) > 130)) {
     #processing each line
     for (line in lines) {
-      x <- substr(line , limit / 2 + 2 , limit)
+      x <- substr(line , limit / 2 , limit)
+      if (unlist(gregexpr("[a-z]", substr(x,1,1))) != -1){
+        x <- substr(x,2,limit)
+      }
       if (!is.null(x) && !nchar(trimws(x)) == 0 && substr(x,1,1) != '$') {
         if (grepl("[A-z]$", trimws(x))) {
           if (!grepl('/' , x , ignore.case = TRUE)) {
@@ -340,7 +355,7 @@ for (k in 1:pages) {
             DimeSuper <- c(DimeSuper,' ')
           }
         }
-        else if (grepl('Quiniela ' , x , ignore.case = TRUE) | grepl('Q1' , x) ){
+        else if (grepl('Quiniela ' , x , ignore.case = TRUE)){
           #Q <- c(Q, trimws(substr(x, length(x), )))
           z <- substr(x,1,which(strsplit(x, "")[[1]]=="$")-1)
           secondSplit <- handleSplit(z)
@@ -366,7 +381,7 @@ for (k in 1:pages) {
           Trifecta <- c(Trifecta, rev(thirdSplit)[1])
         }
         else if (grepl('DimeSuper ' , x , ignore.case = TRUE)) {
-          if(which(strsplit(x, " ")[[1]]=="DimeSuper") == 1)  {
+          if(which(strsplit(trimws(x), " ")[[1]]=="DimeSuper") == 1)  {
             myValuesPos <- unlist(gregexpr(pattern = ',', x))
             ds <- trimws(substr(x,myValuesPos[1]+1 ,myValuesPos[1]+7))
             DimeSuper <- c(DimeSuper, ds)
@@ -384,6 +399,32 @@ for (k in 1:pages) {
   
 }
 
+#new code to format conversion 
+
+RaceNumber <- lapply(RaceNumber ,as.numeric)
+Distance <- lapply(Distance ,as.numeric)
+Time <- lapply(Time ,as.numeric)
+StartingPosition <- lapply(StartingPosition ,as.numeric)
+FinishingPosition <- lapply(FinishingPosition ,as.numeric)
+Win <- lapply(Win ,as.numeric)
+Place <- lapply(Place ,as.numeric)
+Show <- lapply(Show ,as.numeric)
+#ncode ends
+
+#handle extra or less number of Quinella, trifecta, exacta, dimesupeer
+if(length(Quinella) > length(RaceNumber)){
+  Quinella <- Quinella[-length(RaceNumber)]
+}
+if(length(Exacta) > length(RaceNumber)){
+  Exacta <- Exacta[-length(RaceNumber)]
+}
+if(length(Trifecta) < length(RaceNumber)){
+  Trifecta <- c(Trifecta, ' ')
+}
+if(length(DimeSuper) < length(RaceNumber)){
+  DimeSuper <- c(DimeSuper, ' ')
+}
+#
 
 tempry <- diff(temp)
 tempry <- c(tempry, length(Name) - sum(tempry))
@@ -408,10 +449,6 @@ for (r in 1 : length(tempry)) {
   DimeSuper <- append(DimeSuper,elem,temp[r]+1)
 }
 
-#only for SOUTHLAND-Aug18-Friday-Evening-Charts
-if(length(Quinella) > length(Name)){
-  Quinella <- Quinella[-length(Name)]
-}
 
 # handling win place show to fit exactly at same place as required
 for ( nm in Name) {
@@ -452,4 +489,4 @@ UniqueIdentifier <- paste(RaceDate,"_",Track,"_",RaceNumber,"_",Grade,"_",Starti
 
 #####Exporting to excel
 exportDataToExcel <- data.frame(Name,UniqueIdentifier,RaceDate,Track,RaceNumber,Grade,StartingPosition,FinishingPosition,Distance,Time,Win,Place,Show,Quinella,Exacta,Trifecta,DimeSuper, check.rows= FALSE)
-write.xlsx(exportDataToExcel,"D:/dummy2.xlsx",sheetName = "Newdata2")
+write.xlsx(exportDataToExcel,"D:/dummy6.xlsx",sheetName = "Newdata2")
