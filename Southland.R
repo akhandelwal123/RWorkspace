@@ -171,6 +171,11 @@ handleDate <- function(x){
       #dat <- append(dat,racemap[[v]],1)
     }
   }
+  for (v in ls(racemaptwo)) {
+    if (grepl(v , x , ignore.case = TRUE)) {
+      dat<- paste(dat,racemaptwo[[v]],sep = '')
+    }
+  }
   return(dat)
 }
 
@@ -208,9 +213,13 @@ assign('Thursday', 'Thur', racemap)
 assign('Friday', 'Fri', racemap)
 assign('Saturday', 'Sat', racemap)
 assign('Sunday', 'Sun', racemap)
-assign('Evening', 'Eve', racemap)
-assign('Twilight', 'Twi', racemap)
-assign('Afternoon', 'Aft', racemap)
+
+#racemap <- new.env(hash=T, parent=emptyenv())
+racemaptwo <- new.env(hash=T, parent=emptyenv())
+assign('Evening', 'Eve', racemaptwo)
+assign('Twilight', 'Twi', racemaptwo)
+assign('Afternoon', 'Aft', racemaptwo)
+
 
 
 #Tracks
@@ -419,6 +428,17 @@ for (k in 1:pages) {
   }
 }
 
+#new code to format conversion 
+
+RaceNumber <- lapply(RaceNumber ,as.numeric)
+Distance <- lapply(Distance ,as.numeric)
+
+Time <- lapply(Time ,as.numeric)
+Win <- lapply(Win ,as.numeric)
+StartingPosition <- lapply(StartingPosition ,as.numeric)
+Place <- lapply(Place ,as.numeric)
+Show <- lapply(Show ,as.numeric)
+#ncode ends
 
 #Refactoring Grade , RaceNumber , Distance 
 div <- c(1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153)
